@@ -39,6 +39,7 @@ def main(argv: list[str] | None = None) -> dict:
                         default=Path(__file__).resolve().parent / "output")
     parser.add_argument("--no-plots", action="store_true", help="不生成图片")
     parser.add_argument("--verbose", action="store_true", help="打印搜索进度")
+    parser.add_argument("--algorithm", choices=("enumerate", "bfs", "dfs", "compare"), default="enumerate", help="选择搜索算法")
     args = parser.parse_args(argv)
 
     initial = args.initial
@@ -47,6 +48,49 @@ def main(argv: list[str] | None = None) -> dict:
     print("初始位置（按列、1-based 行号）：", [x + 1 for x in initial])
     print(pretty_board(initial))
     print("初始互相攻击的皇后对数：", conflicts(initial))
+
+    if args.algorithm in ("bfs", "dfs", "compare"):
+        from search_graph import run_search
+        if args.algorithm == "compare":
+            _, base_state = run_queens(initial)
+            comparison = {"enumerate": {
+                "minimum_moves": base_state["best_cost"],
+                "explored": base_state["checked"],
+                "goal_rows_1based": [x + 1 for x in base_state["best"]],
+            }}
+            for method in ("bfs", "dfs"):
+                _, state = run_search(initial, method)
+                comparison[method] = state["result"]
+            if len({value["minimum_moves"] for value in comparison.values()}) != 1:
+                raise AssertionError("搜索算法最优移动数不一致")
+            output_dir = args.output_dir
+            output_dir.mkdir(parents=True, exist_ok=True)
+            (output_dir / "comparison.json").write_text(
+                json.dumps(comparison, ensure_ascii=False, indent=2), encoding="utf-8")
+            print("\n=== 三种算法比较 ===")
+            for method, item in comparison.items():
+                print(f"{method}: 移动 {item['minimum_moves']} 次，检查 {item['explored']} 个节点")
+            print("已保存：", output_dir / "comparison.json")
+            return comparison
+        graph, state = run_search(initial, args.algorithm)
+        outcome = state["result"]
+        goal = tuple(x - 1 for x in outcome["goal_rows_1based"])
+        moves = find_moves(initial, goal)
+        print(f"\n=== {args.algorithm.upper()} 搜索结果 ===")
+        print("最少移动次数：", outcome["minimum_moves"])
+        print("展开节点：", outcome["explored"])
+        print("目标布局：", outcome["goal_rows_1based"])
+        for index, move in enumerate(moves, 1):
+            print(f"移动 {index}: 第{move['column']}列，第{move['from_row']}行 -> 第{move['to_row']}行")
+        output_dir = args.output_dir
+        output_dir.mkdir(parents=True, exist_ok=True)
+        (output_dir / f"result_{args.algorithm}.json").write_text(
+            json.dumps(outcome, ensure_ascii=False, indent=2), encoding="utf-8")
+        if not args.no_plots:
+            from visualize import plot_solution, plot_workflow
+            plot_solution(initial, goal, output_dir / f"solution_{args.algorithm}.png")
+            plot_workflow(graph, output_dir / args.algorithm)
+        return outcome
 
     graph, final = run_queens(initial, verbose=args.verbose)
     goal = final["best"]
