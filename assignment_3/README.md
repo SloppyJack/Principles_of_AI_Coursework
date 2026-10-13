@@ -16,11 +16,11 @@
 ```bash
 python -m pip install -r requirements.txt
 python run_coursework.py queens
-python run_coursework.py queens --initial "1,2,3,4,5,6,7,8"
+python run_coursework.py queens --initial "1,3,5,7,2,4,6,8"
 python run_coursework.py queens --initial "4,2,7,3,6,8,5,1" --no-plots
 ```
 
-或在 `assignment_3` 中 `python main.py`。`--initial` 接收从**第 1 列到第 8 列**的行号，值 `1..8`，用逗号或空格分隔（空格形式需要引号）。若不传，默认是全部位于主对角线的 `[1,2,3,4,5,6,7,8]`。
+或在 `assignment_3` 中 `python main.py`。`--initial` 接收从**第 1 列到第 8 列**的行号，值 `1..8`，用逗号或空格分隔（空格形式需要引号）。若不传，默认采用课堂图片识别后的初始布局 `[1,3,5,7,2,4,6,8]`（列从左至右、行从上至下编号 1–8；其中第 7 列的位置依据图片作暂定识别，如图片更清晰需核对）。
 
 原八数码不受影响：
 
