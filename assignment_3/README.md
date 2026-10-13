@@ -40,9 +40,12 @@ python -m unittest discover -s assignment_3/tests -v
 assignment_3/
 ├── queens_core.py        # 状态检查、冲突统计、回溯生成全部解、移动路径
 ├── queens_agent.py       # LangGraph 共享状态与循环搜索节点
+├── search_methods.py     # BFS / 迭代加深 DFS 搜索
+├── search_graph.py       # 两种搜索方法的 LangGraph 编排和结果验证
 ├── visualize.py          # 搜索统计、移动路径、离线工作流图
 ├── main.py               # 命令行接口、输出 JSON / PNG / Mermaid
-├── tests/test_queens.py  # 可独立运行的标准库 unittest
+├── tests/test_queens.py  # 现有核心测试
+├── tests/test_search_methods.py  # BFS / DFS 最优性与图集成测试
 └── output/               # 程序自动创建（不包含在压缩包中）
 ```
 
@@ -65,6 +68,30 @@ assignment_3/
 - `search_stats.png`：逐候选代价与最优代价改善过程；
 - `workflow.png`：离线流程示意图，不依赖 Mermaid 网络；
 - `workflow.mmd`：从**实际编译的 LangGraph**导出的 Mermaid 源代码。
+
+
+## 三种算法（新增 BFS / DFS）
+
+保留原有的 `enumerate`（回溯产生 92 个合法棋盘，再在 LangGraph 中比较移动代价），另增加：
+
+- **BFS 广度优先搜索**：每个搜索状态是允许移动的皇后列集合（8 位 bitmask），逐层添加一列；找到第一个能对应某个合法目标布局的集合时结束。队列以 `collections.deque` 实现。
+- **DFS 深度优先搜索**：采用**迭代加深 DFS（IDDFS）**，深度上限从 0 到 8 逐次增加，每次用栈进行深度优先遍历；不同于普通 DFS，仍然保证全局最少移动数。
+
+每个集合的未移动列必须保留初始行号；移动列则可以调整到合法目标的行。因为一个最终布局完全取决于变更的列集合，最小可行集合的元素数量即最小移动次数。枚举列集合使用列号递增的规范顺序来避免重复排列。同一列改变到任意行计为一次移动，中间允许冲突。这是**移动列集合的 BFS / DFS**，不是对所有 `8^8` 个中间棋盘逐一展开。
+
+三种方法都接入 LangGraph：原方法保留 `init → search(循环) → END`，新方法使用 `init → search(BFS/DFS) → verify → END`。新方法内部的队列/栈执行搜索，LangGraph 编排初始化、搜索和独立结果验证。
+
+```bash
+python run_coursework.py queens --algorithm enumerate
+python run_coursework.py queens --algorithm bfs
+python run_coursework.py queens --algorithm dfs
+python run_coursework.py queens --algorithm compare
+python -m unittest discover -s assignment_3/tests -v
+```
+
+`compare` 将三种算法的最少移动数与搜索节点数写入 `assignment_3/output/comparison.json`。此处 `enumerate` 的 92 是合法目标布局检查数，而 BFS / DFS 的 `explored` 是列集合搜索状态检查数，**统计口径不同，不应直接作为同质的性能比较**；如需比较耗时，可单独重复计时并注明运行环境。
+
+课堂照片识别的默认初态（行从上到下、列从左到右，均为 1-based）为 `[1,3,5,7,2,4,6,8]`，三种方法最小移动次数均为 **3**。第 7 列原图相对模糊，初态按先前约定暂定。
 
 ## 注意
 
