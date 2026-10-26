@@ -1,0 +1,18 @@
+{
+  "runs": 300,
+  "configurations": 10,
+  "repeats_per_configuration": 30,
+  "unit_tests_passed": 5,
+  "deterministic_rerun_matches": true,
+  "checked": [
+    "8080 evaluations per run",
+    "101 history entries per run",
+    "first optimum hit",
+    "binary best genome and fitness",
+    "monotone elite fitness",
+    "identical paired initial populations via SHA256",
+    "vendor source hashes",
+    "report image paths"
+  ],
+  "note": "Elapsed time excluded from deterministic comparison."
+}

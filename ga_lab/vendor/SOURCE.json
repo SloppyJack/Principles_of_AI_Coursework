@@ -1,0 +1,13 @@
+{
+  "commit": "8a96fd3a75026f7b30e835f595a5199c75634ddf",
+  "files": {
+    "onemax_short.py": {
+      "url": "https://raw.githubusercontent.com/DEAP/deap/8a96fd3a75026f7b30e835f595a5199c75634ddf/examples/ga/onemax_short.py",
+      "sha256": "e5b9c79a0f3e895880f4844b2a283bcd8dd1fa28099a40679c6f1f4a09279401"
+    },
+    "DEAP_LICENSE.txt": {
+      "url": "https://raw.githubusercontent.com/DEAP/deap/8a96fd3a75026f7b30e835f595a5199c75634ddf/LICENSE.txt",
+      "sha256": "9ccf26cfe845e0eb8bb58053e47366e7ab6b697ae010f7650978d4b71b7d1fc1"
+    }
+  }
+}

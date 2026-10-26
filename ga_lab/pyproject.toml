@@ -1,0 +1,9 @@
+[project]
+name = "ga-group-homework"
+version = "0.1.0"
+description = "Reproducible OneMax genetic algorithm operator experiments"
+requires-python = ">=3.12"
+dependencies = ["deap==1.4.3", "numpy==2.5.4", "matplotlib==3.10.8"]
+
+[tool.uv]
+package = false
